@@ -108,6 +108,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import http from "/http/http.js"
 
 const form = reactive({
   username: '',
@@ -121,7 +122,7 @@ const loading = ref(false)
 const countdown = ref(0) // 倒计时
 
 // 发送验证码
-const onSendCode = () => {
+const onSendCode = async () => {
   if (!form.email.trim()) {
     uni.showToast({ title: '请输入邮箱', icon: 'none' })
     return
@@ -142,6 +143,9 @@ const onSendCode = () => {
       clearInterval(timer)
     }
   }, 1000)
+  
+  let result = await http.getEmailCode(form.email)
+  console.log("result: ", result)
 }
 
 const onRegister = () => {
