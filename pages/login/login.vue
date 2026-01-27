@@ -55,6 +55,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import http from '../../http/http'
 
 const form = reactive({
   email: '',
@@ -63,7 +64,8 @@ const form = reactive({
 
 const loading = ref(false)
 
-const onLogin = () => {
+const onLogin = async () => {
+	console.log('CLICK')
   if (!form.email.trim()) {
     uni.showToast({ title: '请输入邮箱', icon: 'none' })
     return
@@ -82,16 +84,32 @@ const onLogin = () => {
 
   loading.value = true
   uni.showLoading({ title: '登录中...' })
+  
+  // 发送登录请求
+  try{
+  	let result = await http.login(form.email, form.password);
+	uni.showToast({ title: '登录成功', icon: 'success' });
+  	console.log(result)
+	let token = result.token;
+	let user = result.user;
+	uni.setStorageSync("token", token);
+	uni.setStorageSync("user", user);
+	// uni.navigateTo({ url: '/pages/index/index' }) 这种方法可以返回，不用
+	// 跳转到首页
+	uni.redirectTo({
+		url:"/pages/index/index"
+	})
+  }catch(e){
+  	uni.showToast({
+  		title:e.message,
+  		icon:'none'
+  	})
+  }finally{
+  	loading.value = false
+  	uni.hideLoading()
+  }
 
-  // 模拟请求
-  setTimeout(() => {
-    loading.value = false
-    uni.hideLoading()
-    uni.showToast({ title: '登录成功', icon: 'success' })
-    // uni.navigateTo({ url: '/pages/index/index' })
-  }, 800)
 }
-
 const onGotoRegister = () => {
   uni.navigateTo({ url: '/pages/register/register' })
 }
