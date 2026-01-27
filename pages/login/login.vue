@@ -93,7 +93,7 @@ const onLogin = () => {
 }
 
 const onGotoRegister = () => {
-  uni.navigateTo({ url: '/pages/auth/register' })
+  uni.navigateTo({ url: '/pages/register/register' })
 }
 </script>
 

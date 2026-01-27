@@ -46,8 +46,8 @@
           <input
             v-model="form.code"
             class="input code-input"
-            type="number"
-            placeholder="请输入6位验证码"
+            type="text"
+            placeholder="请输入4位验证码"
             placeholder-class="placeholder"
             maxlength="6"
           />
@@ -148,7 +148,7 @@ const onSendCode = async () => {
   console.log("result: ", result)
 }
 
-const onRegister = () => {
+const onRegister = async () => {
   if (!form.username.trim()) {
     uni.showToast({ title: '请输入用户名', icon: 'none' })
     return
@@ -170,8 +170,8 @@ const onRegister = () => {
     uni.showToast({ title: '请输入验证码', icon: 'none' })
     return
   }
-  if (form.code.length !== 6) {
-    uni.showToast({ title: '验证码为6位数字', icon: 'none' })
+  if (form.code.length !== 4) {
+    uni.showToast({ title: '验证码为4位数字', icon: 'none' })
     return
   }
   if (!form.password.trim()) {
@@ -189,16 +189,32 @@ const onRegister = () => {
 
   loading.value = true
   uni.showLoading({ title: '注册中...' })
+  
+  // ⚠️ 关键：统一把验证码转成字符串（防止前导 0 被吃掉）
+  form.code = String(form.code).trim()
+  
+  // 发送注册请求
+  try{
+	  let result = await http.register({
+		  "email": form.email,
+		  "code": form.code,
+		  "password": form.password,
+		  "username": form.username,
+		  "confirm_password": form.confirmPassword
+	  })
+	   uni.showToast({ title: '注册成功！', icon: 'success' })
+	   uni.redirectTo({ url: '/pages/login/login' }) // 注册成功跳登录
+  }catch(e){
+	  uni.showToast({
+	  	title:e.message,
+		icon:'none'
+	  })
+  }finally{
+	  loading.value = false
+	  uni.hideLoading()
+  }
 
-  // 模拟请求
-  setTimeout(() => {
-    loading.value = false
-    uni.hideLoading()
-    uni.showToast({ title: '注册成功！', icon: 'success' })
-    uni.redirectTo({ url: '/pages/login/login' }) // 注册成功跳登录
-  }, 1000)
 }
-
 const onGotoLogin = () => {
   uni.redirectTo({ url: '/pages/login/login' })
 }
