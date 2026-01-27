@@ -189,6 +189,8 @@ const onRegister = () => {
 
   loading.value = true
   uni.showLoading({ title: '注册中...' })
+  
+  
 
   // 模拟请求
   setTimeout(() => {
