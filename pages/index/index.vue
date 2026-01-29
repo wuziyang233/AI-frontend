@@ -110,6 +110,9 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import http from '../../http/http'
+
+let loading = ref(false)
 
 const formData = reactive({
   surname: '',
@@ -140,10 +143,44 @@ const resetForm = () => {
   names.value = []
 }
 
-const onGenerateNames = async (exclude=[]) => {}
+// exclude = [] 就是在给参数设置默认值
+const generateNames = async (exclude=[]) => {
+	if (!formData.surname.trim()) {
+	    uni.showToast({ title: '请输入姓氏', icon: 'none' })
+	    return
+	  }
+	
+	loading.value = true;
+	uni.showLoading({ title: '正在起名中...' });
+	
+	try{
+		// js中的键可以不加引号
+		let result = await http.generateName({
+			"surname": formData.surname,
+			"gender": formData.gender,
+			"length": formData.length,
+			"other":formData.other,
+			"exclude":exclude
+		})
+		names.value = result.names;
+	}catch(e){
+		uni.showToast({
+			title: e.message,
+			icon:'none'
+		})
+	}finally{
+		loading.value = false;
+		uni.hideLoading();
+	}
+	
+}
+
+const onGenerateNames = async () => {
+	await generateNames();
+}
 
 const onReloadNames = async () => {
-	generateNames(exclude=names.value);
+	await generateNames(names.value.map(obj => obj['name']));
 }
 </script>
 
